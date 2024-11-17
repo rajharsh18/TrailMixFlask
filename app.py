@@ -6,8 +6,8 @@ app = Flask(__name__)
 
 @app.route('/hotels', methods=['GET'])
 def get_hotels():
-    location = request.args.get('location')
-    radius = request.args.get('radius', 5000)
+    location = request.args.get('location')  # Expecting "latitude,longitude"
+    radius = request.args.get('radius', 5000)  # Radius in meters, default to 5km
 
     if not location:
         return jsonify({"error": "Missing 'location' parameter"}), 400
@@ -17,7 +17,7 @@ def get_hotels():
         "key": GOOGLE_API_KEY,
         "location": location,
         "radius": radius,
-        "type": "lodging",
+        "type": "lodging",  # Specifies hotels and similar accommodations
     }
 
     response = requests.get(url, params=params)
@@ -31,6 +31,8 @@ def get_hotels():
             "address": hotel.get("vicinity"),
             "rating": hotel.get("rating", "N/A"),
             "user_ratings_total": hotel.get("user_ratings_total", 0),
+            "latitude": hotel["geometry"]["location"].get("lat"),
+            "longitude": hotel["geometry"]["location"].get("lng"),
         }
         for hotel in data.get("results", [])
     ]
